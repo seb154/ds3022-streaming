@@ -48,24 +48,26 @@ From the flow log on the full data (screenshot in `docs/`):
 
 | Number | Full data | Sample (`data/sample`) |
 |---|---:|---:|
-| Raw records landed | TODO | TODO |
-| Malformed (kept in raw) | TODO | TODO |
-| Unique Kafka records | TODO | TODO |
-| Unique TODO (your entity) | TODO | TODO |
+| Raw records landed | 56593 | 5000 |
+| Malformed (kept in raw) | 1 | 0 |
+| Unique Kafka records | 54502 | 4885 |
+| Unique TODO (your entity) | 53858 | 4879 |
 
 ## Challenges / Obstacles
 - cryptography had no prebuilt package for my Mac, so I forced pip to use a binary wheel as an installer.
 _(replace: what this source made hard in gathering, processing and analysis, and how you worked through it. What methods and tools did you use?)_
 
 ## Analysis
-
+German posters reply the most. About 2 of every 3 German posts are replies.
+Japanese posters mostly write originals. Only about 1 in 5 Japanese posts is a reply, much lower than English (55%).
+en-US is mostly bots. I checked: those 1,069 posts come from only 30 accounts, and the top 3 accounts wrote 975 of them (91%). Most Bluesky apps tag posts as plain en. Automated posters (like the crypto bot in your SOURCE_CARD example) often use en-US and almost never reply. So this bar measures a few bots, not the people who write in en-US. That's a good limitation to write about. You can check it yourself with this query in DuckDB:
 _(replace: one clear paragraph. Your research question, what the data shows, one finding that surprised you or is not obvious, and one limitation of your data or method.)_
 
 ## Plot / Visualization
 
 _(replace: at least one chart, saved in charts/ and shown here. Give it a title and labelled axes with units.)_
 
-![TODO chart title](charts/TODO.png)
+![German posts are mostly replies; Japanese posts are mostly originals](charts/reply_share_by_lang.png)
 
 ## Reflection
 

@@ -9,7 +9,7 @@ Add to the entry at the end of every class, and whenever you stop working. Short
 - Blocked:
 
 ## Session 2 · Mon 09 Nov
-- Done:
+- Done: Out sick (not in class)
 - Raw records so far:
 - Next:
 - Blocked:
@@ -39,7 +39,7 @@ Add to the entry at the end of every class, and whenever you stop working. Short
 - Blocked:
 
 ## Session 4 · Mon 16 Nov
-- Done: Ha
+- Done: checkpoint E
 - Raw records so far:
-- Next:
+- Next: checkpoint F (README.md)
 - Blocked:

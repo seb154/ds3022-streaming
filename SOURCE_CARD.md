@@ -55,7 +55,7 @@ Paste one message from the probe (shorten long text fields):
 - If the same thing can arrive in several versions, which one do I keep? The latest version.
 
 ## 6. Research question (draft)
-- One question I could answer with time windows, a comparison, an anomaly or a join: In 5 minute windows, what share of posts are replies compared to original posts, adn how does the share compare between the top languages? 
+- One question I could answer with time windows, a comparison, an anomaly or a join: What percentage of new Bluesky posts are replies (opposed to original posts), and how does that share differ between the top six languages? 
 
 ## 7. Self-check (checkpoint A)
 Tick a box by changing `[ ]` to `[x]`. If a box stays empty, fix the card or choose another source from SOURCES.md. `kit/check_project.py` counts these boxes.
