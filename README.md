@@ -67,22 +67,17 @@ From the flow log on the full data (screenshot in `docs/`):
 | Raw records landed | 56593 | 5000 |
 | Malformed (kept in raw) | 1 | 0 |
 | Unique Kafka records | 54502 | 4885 |
-| Unique TODO (your entity) | 53858 | 4879 |
+| Unique posts (did + rkey) | 53858 | 4879 |
+
+Unique Kafka records (54,502) are lower than raw, malformed as stage() keeps only kind = 'commit' rows, and Jetstream  sends account events that aren't posts.
 
 ## Challenges / Obstacles
-- cryptography had no prebuilt package for my Mac, so I forced pip to use a binary wheel as an installer.
-_(replace: what this source made hard in gathering, processing and analysis, and how you worked through it. What methods and tools did you use?)_
+When installing files I needed, cryptography had no prebuilt package for my Mac, so I forced pip to use a binary wheel as an installer.
 
 ## Analysis
-German posters reply the most. About 2 of every 3 German posts are replies.
-Japanese posters mostly write originals. Only about 1 in 5 Japanese posts is a reply, much lower than English (55%).
-en-US is mostly bots. I checked: those 1,069 posts come from only 30 accounts, and the top 3 accounts wrote 975 of them (91%). Most Bluesky apps tag posts as plain en. Automated posters (like the crypto bot in your SOURCE_CARD example) often use en-US and almost never reply. So this bar measures a few bots, not the people who write in en-US. That's a good limitation to write about. You can check it yourself with this query in DuckDB:
-_(replace: one clear paragraph. Your research question, what the data shows, one finding that surprised you or is not obvious, and one limitation of your data or method.)_
+My research question looked at the percentage of new Bluesky posts that are replies (opposed to original posts) and how that differs  between the top six languages. Overall, 42.9% of new posts are replies. German posters reply the most, about 2/3 of German posts. Japanese posters mostly write originals, much lower than English (in the middle). One limitation was the category 'en-US' came in at 0.5%, which was surprising. However, it is interesting as the top 3 accounts wrote most of the posts and almost never reply, so it's mostly bots. 
 
 ## Plot / Visualization
-
-_(replace: at least one chart, saved in charts/ and shown here. Give it a title and labelled axes with units.)_
-
 ![German posts are mostly replies; Japanese posts are mostly originals](charts/reply_share_by_lang.png)
 
 ## Reflection
@@ -90,5 +85,4 @@ _(replace: at least one chart, saved in charts/ and shown here. Give it a title 
 _(replace: about 150 words, first person. What did you learn about streaming systems that you did not know before Thu 22 Oct? What would you do differently if you started again?)_
 
 ## Acknowledgements
-
-_(replace: everyone who helped you and how (classmates, instructor, online sources), code you reused (for example connection code from probe.py), and any AI assistance: what for, and how you checked the result. Write "None" if there is nothing to declare.)_
+Class files quakes_producer.py / quakes_lander.py / quakes_flow.py, the Session 2–3 worksheet SQL, and AI help. For AI help, used for debugging the install and the tornado imports and explaining the chaos results (I checked it). 
