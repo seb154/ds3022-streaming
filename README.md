@@ -24,7 +24,7 @@ pip install --only-binary cryptography -r requirements.txt
 # quick check, no Kafka needed
 python flow.py data/sample
 
-#full pipeline
+# full pipeline
 docker compose up -d                                          # 3 brokers + console at http://127.0.0.1:8080
 docker exec -it redpanda-0 rpk topic create bluesky_posts -p 3 -r 3
 python producer.py                                            # terminal 1, leave running
@@ -33,10 +33,10 @@ prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
 prefect server start                                          # terminal 3
 python flow.py`                                                
 ```
+The chart is written to `charts/reply_share_by_lang.png`
 
 ## Architecture
-
-_(replace: a diagram (an image in docs/ or a text diagram) of producer → topic → lander → raw Parquet → flow tasks → tables → charts, with the names of your files, topic, tables and charts.)_
+![Flow](docs/flow.JPG)
 
 ## Design decisions
 - Some posts appear more than once. A post can arrive as a create and later a delete or an update, all with the same did + rkey. They're 2 messages but 1 post. Same thing, different Kafka records.
