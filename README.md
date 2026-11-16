@@ -67,7 +67,7 @@ _(replace: one clear paragraph. Your research question, what the data shows, one
 
 _(replace: at least one chart, saved in charts/ and shown here. Give it a title and labelled axes with units.)_
 
-![German posts are mostly replies; Japanese posts are mostly originals](charts/reply_share_by_lang.png)
+![German posts are mostly replies; Japanese posts are mostly originals](charts/reply_share_by_lang.png
 
 ## Reflection
 
