@@ -8,21 +8,20 @@ Source and URL: Bluesky Jetstream, `wss://jetstream2.us-east.bsky.network/subscr
 Method: WebSocket push (server sends posts to you)
 No account or API key, but User-Agent used 
 No account or API key, but you send a User-Agent header.
-
 One message: did (account id), time_us (event time in microseconds), kind, and commit with operation (create/update/delete), rkey (post id) and record (text, langs, and reply).
-
 Live stream, not an archive replay.
 
 ## How to run
 From a fresh clone:
 
-`git clone
+```bash
+git clone
 cd ds3022-streaming
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --only-binary cryptography -r requirements.txt
 
-#quick check, no Kafka needed
+# quick check, no Kafka needed
 python flow.py data/sample
 
 #full pipeline
@@ -33,7 +32,7 @@ python lander.py                                              # terminal 2, writ
 prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
 prefect server start                                          # terminal 3
 python flow.py`                                                
-
+```
 
 ## Architecture
 
