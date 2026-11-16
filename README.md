@@ -1,22 +1,37 @@
-# TODO: your project title
+# Bluesky Replies by Language
 
-**Author:** TODO
+**Author:** Seble Bedassa
 **DS 3022 Data Project 3, Fall 2026**
 
-> There is no interview for this project: this README is where you explain and defend your pipeline. Fill in the title, your name and every italic placeholder, then delete this note. Keep the headings: `kit/check_project.py` looks for them.
-
 ## Data source
-
-_(replace: what source, which URL or stream, pull or push, what one message contains. Mention any account, key or User-Agent needed. If you replay an archive rather than stream live, say so.)_
+Source and URL: Bluesky Jetstream, `wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post`
+Method: WebSocket push (server sends posts to you)
+No account or API key, but User-Agent used 
+No account or API key, but you send a User-Agent header.
+One message: did (account id), time_us (event time in microseconds), kind, and commit with operation (create/update/delete), rkey (post id) and record (text, langs, and reply).
+Live stream, not an archive replay.
 
 ## How to run
+From a fresh clone:
+`
+git clone
+cd ds3022-streaming
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --only-binary cryptography -r requirements.txt
 
-_(replace: the exact commands, in order, from a fresh clone. A classmate will follow them in Session 4 (Mon 16 Nov) without asking you. Include: virtual environment and `pip install`, starting the cluster, creating the topic, running the producer and lander, running the flow on the full data and on the sample:)_
+# quick check, no Kafka needed
+python flow.py data/sample
 
-```bash
-cd project3
-python flow.py data/sample      # runs without Kafka, on the committed sample
-```
+# full pipeline
+docker compose up -d                                          # 3 brokers + console at http://127.0.0.1:8080
+docker exec -it redpanda-0 rpk topic create bluesky_posts -p 3 -r 3
+python producer.py                                            # terminal 1, leave running
+python lander.py                                              # terminal 2, writes data/raw/*.parquet
+prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
+prefect server start                                          # terminal 3
+python flow.py`                                                
+
 
 ## Architecture
 
