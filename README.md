@@ -23,7 +23,8 @@ python flow.py data/sample      # runs without Kafka, on the committed sample
 _(replace: a diagram (an image in docs/ or a text diagram) of producer → topic → lander → raw Parquet → flow tasks → tables → charts, with the names of your files, topic, tables and charts.)_
 
 ## Design decisions
-
+- Some posts appear more than once. A post can arrive as a create and later a delete or an update, all with the same did + rkey. They're 2 messages but 1 post. Same thing, different Kafka records.
+  
 Answer each in 2-4 sentences, in your own words, with your own numbers.
 
 1. **Key and partitions.** _(replace: which key, why, and what it guarantees about order. What would go wrong with another key?)_
@@ -37,9 +38,9 @@ Answer each in 2-4 sentences, in your own words, with your own numbers.
 
 | Card | Prediction | What I did | Numbers before → after | Explanation |
 |---|---|---|---|---|
-| D1 Crash between file and offsets | TODO | TODO | TODO | TODO |
-| D2 Poison message | TODO | TODO | TODO | TODO |
-| TODO (D3, D4 or D5) | TODO | TODO | TODO | TODO |
+| D1 Crash between file and offsets | the raw value would go up by the number of new records and the ones saved twice | stopped the lander, ran producer for about 1min, ran python lander.py crash, then `python lander.py`, then printed values. | raw 27386 -> 31386; malformed 0 -> 0; unique recods 27386 -> 30386; unique posts 26543 -> 29454 | raw - unique kafka records = 1000, which is the crashed batch. The crash created duplicates but nothing was lost. This is at-least-once and DISTINCT removes the copy later. |
+| D2 Poison message | the malformed value will go up | with the lander running, took the numbers before, ran `docker exec -it redpanda-0 rpk topic produce bluesky_posts -k bad`, typed `this is not JSON`, then quit it, waited for `Landed` line, then got the numbers after | raw 31386 -> 32039; malformed 0 -> 1; unique records 30386 -> 31038; unique posts 29454 -> 30100 | to_row() caught the JSON error and saved the row as malformed instead of crashing. the 652 extra records were already in the topic but not landed yet when I took the "before" numbers. |
+| D3 Broker goes down | everything will run | `docker stop redpanda-1` with the producer and lander running, watch what changed, `docker start redpanda-1`, stopped the producer, waited 1min, counted values |  raw 32039 -> 56593; malformed 1 -> 1; unique records 31038 -> 55592; unique posts 30100 -> 53858 | the topic total = unique records + malformed, so nothing was lost. |
 
 ## The four numbers
 

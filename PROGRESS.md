@@ -29,13 +29,13 @@ Add to the entry at the end of every class, and whenever you stop working. Short
 ## Outside · Sun 15 Nov
 - Done: Checkpoint B (producer.py)
 - Raw records so far:
-- Next: checkpoint C (lander.py)
+- Next: checkpoint C (lander.py), checkpoint D
 - Blocked:
   
 ## Outside · Mon 16 Nov
-- Done: Checkpoint C (lander.py), and four_numbers.py
-- Raw records so far:
-- Next: checkpoint C (lander.py)
+- Done: Checkpoint C (lander.py), four_numbers.py, checkpoint D
+- Raw records so far: 56593
+- Next: checkpoint E 
 - Blocked:
 
 ## Session 4 · Mon 16 Nov
