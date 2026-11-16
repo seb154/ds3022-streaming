@@ -31,6 +31,12 @@ Add to the entry at the end of every class, and whenever you stop working. Short
 - Raw records so far:
 - Next: checkpoint C (lander.py)
 - Blocked:
+  
+## Outside · Mon 16 Nov
+- Done: Checkpoint C (lander.py), and four_numbers.py
+- Raw records so far:
+- Next: checkpoint C (lander.py)
+- Blocked:
 
 ## Session 4 · Mon 16 Nov
 - Done: Ha
