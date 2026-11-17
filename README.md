@@ -70,6 +70,7 @@ Unique Kafka records (54,502) are lower than raw, malformed as stage() keeps onl
 
 ## Challenges / Obstacles
 When installing files I needed, cryptography had no prebuilt package for my Mac, so I forced pip to use a binary wheel as an installer.
+kit/check_project.py flags data/sample/sample.parquet as a file that should not be committed. This is a false alarm caused by my repo being rooted at project3/: the check looks for /data/sample/ with a leading slash, so my path doesn't match.
 
 ## Analysis
 My research question looked at the percentage of new Bluesky posts that are replies (opposed to original posts) and how that differs  between the top six languages. Overall, 42.9% of new posts are replies. German posters reply the most, about 2/3 of German posts. Japanese posters mostly write originals, much lower than English (in the middle). One limitation was the category 'en-US' came in at 0.5%, which was surprising. However, it is interesting as the top 3 accounts wrote most of the posts and almost never reply, so it's mostly bots. 
