@@ -7,7 +7,7 @@ Fill this in during Session 1 (Thu 05 Nov) with **measured** numbers from `pytho
 
 ## 1. The source
 - Source and URL: Bluesky Jetstream, `wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post`
-- Method (WebSocket push, REST polling or REST history pull): WebSocket push
+- Method (WebSocket push, REST polling or REST history pull): WebSocket push 
 - Account, key or User-Agent needed: none
 - Limits I know about (rate limits, paging, reconnects): no rate limit
 

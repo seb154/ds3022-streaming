@@ -39,7 +39,13 @@ Add to the entry at the end of every class, and whenever you stop working. Short
 - Blocked:
 
 ## Session 4 · Mon 16 Nov
-- Done: checkpoint E
+- Done: checkpoint E, parts of checkpoint F
 - Raw records so far:
 - Next: checkpoint F (README.md)
+- Blocked:
+
+## Outside · Tues 17 Nov
+- Done: checkpoint F
+- Raw records so far:
+- Next: Rubric and Checkpoint
 - Blocked:
