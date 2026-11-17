@@ -1,39 +1,52 @@
-# TODO: your project title
+# Bluesky Replies by Language
 
-**Author:** TODO
+**Author:** Se
 **DS 3022 Data Project 3, Fall 2026**
 
-> There is no interview for this project: this README is where you explain and defend your pipeline. Fill in the title, your name and every italic placeholder, then delete this note. Keep the headings: `kit/check_project.py` looks for them.
-
 ## Data source
-
-_(replace: what source, which URL or stream, pull or push, what one message contains. Mention any account, key or User-Agent needed. If you replay an archive rather than stream live, say so.)_
+Source and URL: Bluesky Jetstream, `wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post`
+Method: WebSocket push (server sends posts to you)
+No account or API key, but User-Agent used 
+No account or API key, but you send a User-Agent header.
+One message: did (account id), time_us (event time in microseconds), kind, and commit with operation (create/update/delete), rkey (post id) and record (text, langs, and reply).
+Live stream, not an archive replay.
 
 ## How to run
-
-_(replace: the exact commands, in order, from a fresh clone. A classmate will follow them in Session 4 (Mon 16 Nov) without asking you. Include: virtual environment and `pip install`, starting the cluster, creating the topic, running the producer and lander, running the flow on the full data and on the sample:)_
+From a fresh clone:
 
 ```bash
-cd project3
-python flow.py data/sample      # runs without Kafka, on the committed sample
+git clone
+cd ds3022-streaming
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --only-binary cryptography -r requirements.txt
+
+# quick check, no Kafka needed
+python flow.py data/sample
+
+# full pipeline
+docker compose up -d                                          # 3 brokers + console at http://127.0.0.1:8080
+docker exec -it redpanda-0 rpk topic create bluesky_posts -p 3 -r 3
+python producer.py                                            # terminal 1, leave running
+python lander.py                                              # terminal 2, writes data/raw/*.parquet
+prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
+prefect server start                                          # terminal 3
+python flow.py`                                                
 ```
+The chart is written to `charts/reply_share_by_lang.png`
 
 ## Architecture
-
-_(replace: a diagram (an image in docs/ or a text diagram) of producer → topic → lander → raw Parquet → flow tasks → tables → charts, with the names of your files, topic, tables and charts.)_
+![Flow](docs/flow.JPG)
 
 ## Design decisions
-- Some posts appear more than once. A post can arrive as a create and later a delete or an update, all with the same did + rkey. They're 2 messages but 1 post. Same thing, different Kafka records.
-  
-Answer each in 2-4 sentences, in your own words, with your own numbers.
 
-1. **Key and partitions.** _(replace: which key, why, and what it guarantees about order. What would go wrong with another key?)_
-2. **Batch size and time.** _(replace: your batch size and time limit. With your source's rate, which rule closes most batches? How many files per hour does that make?)_
-3. **Offsets after the file.** _(replace: what happens if the lander crashes after writing a file but before storing offsets, and why you accept that.)_
-4. **Duplicates.** _(replace: what makes two records the same Kafka record, and what makes them the same thing. Which SQL removes each kind?)_
-5. **Windows and time.** _(replace: which time column your analysis uses (event time or landing time), which window size, and why.)_
-6. **Ten times the volume.** _(replace: what in your pipeline would break or slow down first at 10x your rate, and what you would change.)_
-
+1. **Key and partitions.** The key is `did`. The same key always goes to the same partition, so one account's posts stay in order. Different accounts are spread across the 3 partitions. With no key, one account's post and delete could land in different partitions and be out of order. 
+2. **Batch size and time.** Batch size of 1000, with 60s time limit. At 45/s, 1000 records fill in about 24s, so the size rule closes most batches. In an hour, at 45/s message rate, about 162000 messages and 162 files are made. 
+3. **Offsets after the file.** If the lander crashes after the file but before storing offsets, it rereads that batch on restart and writes it again. The data is not lost but is duplicated. You accept this because the flow's DISTINCT removes the copies. 
+4. **Duplicates.** A post can arrive as a create and later a delete or an update, all with the same did + rkey. They're 2 messages but 1 post. Same thing, different Kafka records. They are removed by `SELECT DISTINCT` in `stage()`. 
+5. **Windows and time.** My research question is a comparison and not a time window. That said, I used event time and no window because the data came in separate windows, so hourly windows would have big gaps and wouldn't mean much.
+6. **Ten times the volume.** At 10x my rate, which is 450 messages/s, the 1000-record batch would fill in about 2.4 s, giving 1,500 files in an hour. A single lander might not keep up, so lag would grow. Every run, flow.py rereads all raw files, so it gets slower as data grows. Some fixes include: bigger batches (10,000, for example), more partitions with more lander copies, and a flow that only reads new files.
+   
 ## Chaos round
 
 | Card | Prediction | What I did | Numbers before → after | Explanation |
@@ -51,28 +64,22 @@ From the flow log on the full data (screenshot in `docs/`):
 | Raw records landed | 56593 | 5000 |
 | Malformed (kept in raw) | 1 | 0 |
 | Unique Kafka records | 54502 | 4885 |
-| Unique TODO (your entity) | 53858 | 4879 |
+| Unique posts (did + rkey) | 53858 | 4879 |
+
+Unique Kafka records (54,502) are lower than raw, malformed as stage() keeps only kind = 'commit' rows, and Jetstream  sends account events that aren't posts.
 
 ## Challenges / Obstacles
-- cryptography had no prebuilt package for my Mac, so I forced pip to use a binary wheel as an installer.
-_(replace: what this source made hard in gathering, processing and analysis, and how you worked through it. What methods and tools did you use?)_
+When installing files I needed, cryptography had no prebuilt package for my Mac, so I forced pip to use a binary wheel as an installer.
+kit/check_project.py flags data/sample/sample.parquet as a file that should not be committed. This is a false alarm caused by my repo being rooted at project3/: the check looks for /data/sample/ with a leading slash, so my path doesn't match.
 
 ## Analysis
-German posters reply the most. About 2 of every 3 German posts are replies.
-Japanese posters mostly write originals. Only about 1 in 5 Japanese posts is a reply, much lower than English (55%).
-en-US is mostly bots. I checked: those 1,069 posts come from only 30 accounts, and the top 3 accounts wrote 975 of them (91%). Most Bluesky apps tag posts as plain en. Automated posters (like the crypto bot in your SOURCE_CARD example) often use en-US and almost never reply. So this bar measures a few bots, not the people who write in en-US. That's a good limitation to write about. You can check it yourself with this query in DuckDB:
-_(replace: one clear paragraph. Your research question, what the data shows, one finding that surprised you or is not obvious, and one limitation of your data or method.)_
+My research question looked at the percentage of new Bluesky posts that are replies (opposed to original posts) and how that differs  between the top six languages. Overall, 42.9% of new posts are replies. German posters reply the most, about 2/3 of German posts. Japanese posters mostly write originals, much lower than English (in the middle). One limitation was the category 'en-US' came in at 0.5%, which was surprising. However, it is interesting as the top 3 accounts wrote most of the posts and almost never reply, so it's mostly bots. 
 
 ## Plot / Visualization
-
-_(replace: at least one chart, saved in charts/ and shown here. Give it a title and labelled axes with units.)_
-
 ![German posts are mostly replies; Japanese posts are mostly originals](charts/reply_share_by_lang.png)
 
 ## Reflection
-
-_(replace: about 150 words, first person. What did you learn about streaming systems that you did not know before Thu 22 Oct? What would you do differently if you started again?)_
+One of the biggest things I learned about streaming systems was how replicas let cluster survive a broker going down. The idea of leader and followers allow copies of partitions as a majority of replicas are needed for the record to stored (it is confirmed). So when a broker goes down and joins again, it rejoins as a follower and copies the records it missed from the leader, and once it's caught up the partitions are fully replicated again. This allows for no data to be lost. If I started again, I would set aside more time to analyze some of the results I got. For example, for one of the six languages that I looked at, the category 'en-US' yielded very interesting results (it initially raised a flag as it was separate from the 'en' category) that warranted further analysis and investigation. I would definitely make more time to do EDA on the source beforehand. 
 
 ## Acknowledgements
-
-_(replace: everyone who helped you and how (classmates, instructor, online sources), code you reused (for example connection code from probe.py), and any AI assistance: what for, and how you checked the result. Write "None" if there is nothing to declare.)_
+Class files quakes_producer.py / quakes_lander.py / quakes_flow.py, the Session 2–3 worksheet SQL, and AI help. For AI help, used for debugging the install and the tornado imports and explaining the chaos results (I checked it).
