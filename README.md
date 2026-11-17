@@ -39,17 +39,14 @@ The chart is written to `charts/reply_share_by_lang.png`
 ![Flow](docs/flow.JPG)
 
 ## Design decisions
-- Some posts appear more than once. A post can arrive as a create and later a delete or an update, all with the same did + rkey. They're 2 messages but 1 post. Same thing, different Kafka records.
-  
-Answer each in 2-4 sentences, in your own words, with your own numbers.
 
-1. **Key and partitions.** _(replace: which key, why, and what it guarantees about order. What would go wrong with another key?)_
-2. **Batch size and time.** _(replace: your batch size and time limit. With your source's rate, which rule closes most batches? How many files per hour does that make?)_
-3. **Offsets after the file.** _(replace: what happens if the lander crashes after writing a file but before storing offsets, and why you accept that.)_
-4. **Duplicates.** _(replace: what makes two records the same Kafka record, and what makes them the same thing. Which SQL removes each kind?)_
-5. **Windows and time.** _(replace: which time column your analysis uses (event time or landing time), which window size, and why.)_
-6. **Ten times the volume.** _(replace: what in your pipeline would break or slow down first at 10x your rate, and what you would change.)_
-
+1. **Key and partitions.** The key is `did`. The same key always goes to the same partition, so one account's posts stay in order. Different accounts are spread across the 3 partitions. With no key, one account's post and delete could land in different partitions and be out of order. 
+2. **Batch size and time.** Batch size of 1000, with 60s time limit. At 45/s, 1000 records fill in about 24s, so the size rule closes most batches. In an hour, at 45/s message rate, about 162000 messages and 162 files are made. 
+3. **Offsets after the file.** If the lander crashes after the file but before storing offsets, it rereads that batch on restart and writes it again. The data is not lost but is duplicated. You accept this because the flow's DISTINCT removes the copies. 
+4. **Duplicates.** A post can arrive as a create and later a delete or an update, all with the same did + rkey. They're 2 messages but 1 post. Same thing, different Kafka records. They are removed by `SELECT DISTINCT` in `stage()`. 
+5. **Windows and time.** My research question is a comparison and not a time window. That said, I used event time and no window because the data came in separate windows, so hourly windows would have big gaps and wouldn't mean much.
+6. **Ten times the volume.** At 10x my rate, which is 450 messages/s, the 1000-record batch would fill in about 2.4 s, giving 1,500 files in an hour. A single lander might not keep up, so lag would grow. Every run, flow.py rereads all raw files, so it gets slower as data grows. Some fixes include: bigger batches (10,000, for example), more partitions with more lander copies, and a flow that only reads new files.
+   
 ## Chaos round
 
 | Card | Prediction | What I did | Numbers before → after | Explanation |
@@ -81,8 +78,7 @@ My research question looked at the percentage of new Bluesky posts that are repl
 ![German posts are mostly replies; Japanese posts are mostly originals](charts/reply_share_by_lang.png)
 
 ## Reflection
-
-_(replace: about 150 words, first person. What did you learn about streaming systems that you did not know before Thu 22 Oct? What would you do differently if you started again?)_
+One of the biggest things I learned about streaming systems was how replicas let cluster survive a broker going down. The idea of leader and followers allow copies of partitions as a majority of replicas are needed for the record to stored (it is confirmed). So when a broker goes down and joins again, it rejoins as a follower and copies the records it missed from the leader, and once it's caught up the partitions are fully replicated again. This allows for no data to be lost. If I started again, I would set aside more time to analyze some of the results I got. For example, for one of the six languages that I looked at, the category 'en-US' yielded very interesting results (it initially raised a flag as it was separate from the 'en' category) that warranted further analysis and investigation. I would definitely make more time to do EDA on the source beforehand. 
 
 ## Acknowledgements
 Class files quakes_producer.py / quakes_lander.py / quakes_flow.py, the Session 2–3 worksheet SQL, and AI help. For AI help, used for debugging the install and the tornado imports and explaining the chaos results (I checked it). 
