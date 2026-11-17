@@ -14,6 +14,7 @@ Required (at least these three):
 ![prefect dashboard](prefect_dashboard.png)
    
 4. The architecture diagram
-![diagram](flow.png)
+![diagram](flow.JPG)
 
-Useful extras: the architecture diagram, before/after numbers from the chaos round, the chart before and after the chart swap.
+5. Chaos round: D3 broker down
+![diagram](d3_broker_down.png)
